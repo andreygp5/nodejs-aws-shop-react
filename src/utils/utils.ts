@@ -11,5 +11,5 @@ export const getAuthToken = (): string => {
     return "";
   }
 
-  return btoa(window.btoa(authToken));
+  return window.btoa(authToken);
 };
