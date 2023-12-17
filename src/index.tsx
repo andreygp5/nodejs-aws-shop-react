@@ -7,10 +7,22 @@ import { BrowserRouter } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "react-query";
 import { ReactQueryDevtools } from "react-query/devtools";
 import { theme } from "~/theme";
+import { AxiosError } from "axios";
 
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: { refetchOnWindowFocus: false, retry: false, staleTime: Infinity },
+    mutations: {
+      onError: (error) => {
+        if (!(error instanceof AxiosError)) {
+          return;
+        }
+
+        if ([401, 403].includes(error?.response?.status || 0)) {
+          window.alert("Not Authorized");
+        }
+      },
+    },
   },
 });
 
