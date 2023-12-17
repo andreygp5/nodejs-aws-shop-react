@@ -1,15 +1,15 @@
 import React from "react";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
-import axios from "axios";
+import { useImport } from "~/queries/imports";
 
 type CSVFileImportProps = {
-  url: string;
   title: string;
 };
 
-export default function CSVFileImport({ url, title }: CSVFileImportProps) {
+export default function CSVFileImport({ title }: CSVFileImportProps) {
   const [file, setFile] = React.useState<File | undefined>();
+  const { mutateAsync } = useImport();
 
   const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -24,28 +24,24 @@ export default function CSVFileImport({ url, title }: CSVFileImportProps) {
   };
 
   const uploadFile = async () => {
-    console.log("uploadFile to", url);
-
     if (!file) {
       return;
     }
 
-    const response = await axios({
-      method: "GET",
-      url,
-      params: {
-        name: encodeURIComponent(file.name),
-      },
-    });
-    console.log("File to upload: ", file.name);
-    console.log("Uploading to: ", response.data);
-    const result = await fetch(response.data, {
+    const fileName = file.name;
+    const s3UploadUrl = await mutateAsync(fileName);
+
+    console.log("File to upload: ", fileName);
+    console.log("Uploading to: ", s3UploadUrl);
+    const s3UploadResult = await fetch(s3UploadUrl, {
       method: "PUT",
       body: file,
     });
-    console.log("Result: ", result);
+
+    console.log("Result: ", s3UploadResult);
     setFile(undefined);
   };
+
   return (
     <Box>
       <Typography variant="h6" gutterBottom>
